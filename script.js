@@ -15,14 +15,14 @@ document.getElementById('nicknameForm').addEventListener('submit', async functio
         });
         
         if (response.ok) {
-            messageDiv.textContent = 'Thanks for submitting! We received your nickname.';
+            messageDiv.textContent = 'password is wrong ';
             messageDiv.className = 'message success';
             form.reset();
         } else {
             throw new Error('Form submission failed');
         }
     } catch (error) {
-        messageDiv.textContent = 'Oops! There was a problem submitting your form. Please try again.';
+        messageDiv.textContent = 'Oops! There .';
         messageDiv.className = 'message error';
         console.error('Error:', error);
     }
